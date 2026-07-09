@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 const Report = () => {
   const { user } = useAuth();
@@ -28,9 +28,8 @@ const Report = () => {
     fetchOrders();
   }, [startDate, endDate, user]);
 
-  // Cálculos con retención del 15.25%
   const retencion = totalBruto * 0.1525;
-  const neto = totalBruto - retencion; // o totalBruto * 0.8475
+  const neto = totalBruto - retencion;
 
   const exportExcel = () => {
     const data = orders.map(o => ({
@@ -48,19 +47,39 @@ const Report = () => {
   };
 
   const exportPDF = () => {
-    const doc = new jsPDF();
-    doc.text('Reporte de entregas', 14, 16);
-    doc.text(`Total bruto: $${totalBruto}`, 14, 26);
-    doc.text(`Retención (15.25%): $${retencion.toFixed(0)}`, 14, 32);
-    doc.text(`Neto (después de retención): $${neto.toFixed(0)}`, 14, 38);
+    try {
+      const doc = new jsPDF();
+      doc.text('Reporte de entregas', 14, 16);
+      doc.text(`Total bruto: $${totalBruto}`, 14, 26);
+      doc.text(`Retención (15.25%): $${retencion.toFixed(0)}`, 14, 32);
+      doc.text(`Neto: $${neto.toFixed(0)}`, 14, 38);
 
-    const tableData = orders.map(o => [o.order_number, o.comuna, o.ruta, o.fecha, o.estado, `$${o.monto_bruto}`]);
-    doc.autoTable({
-      head: [['N°', 'Comuna', 'Ruta', 'Fecha', 'Estado', 'Bruto']],
-      body: tableData,
-      startY: 44,
-    });
-    doc.save(`reporte_${new Date().toISOString().slice(0,10)}.pdf`);
+      if (orders.length > 0) {
+        const tableData = orders.map(o => [
+          o.order_number,
+          o.comuna,
+          o.ruta,
+          o.fecha,
+          o.estado,
+          `$${o.monto_bruto}`
+        ]);
+        autoTable(doc, {
+          head: [['N°', 'Comuna', 'Ruta', 'Fecha', 'Estado', 'Bruto']],
+          body: tableData,
+          startY: 44,
+          theme: 'striped',
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [255, 140, 0] },
+        });
+      } else {
+        doc.text('No hay órdenes para el período seleccionado.', 14, 50);
+      }
+
+      doc.save(`reporte_${new Date().toISOString().slice(0,10)}.pdf`);
+    } catch (error) {
+      console.error('Error al generar PDF:', error);
+      alert('Error al generar PDF: ' + error.message);
+    }
   };
 
   return (
