@@ -19,69 +19,158 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  /* Ajustes para inputs en móviles */
+  
+  /* --- Ajustes para inputs, selects y textareas (tamaño aumentado) --- */
   input, select, textarea {
-    @apply bg-[#2d2d2d] text-[#f0f0f0] border border-[#444] rounded-lg px-3 py-2 w-full;
-    font-size: 16px; /* Evita zoom en iOS */
+    @apply bg-[#2d2d2d] text-[#f0f0f0] border border-[#555] rounded-lg px-4 py-3 w-full;
+    font-size: 18px; /* Tamaño grande para legibilidad */
+    line-height: 1.5;
     -webkit-appearance: none;
     appearance: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-height: 54px; /* Altura mínima para facilitar el toque */
   }
   input:focus, select:focus, textarea:focus {
-    @apply outline-none ring-2 ring-[#ff8c00];
+    @apply outline-none ring-2 ring-[#ff8c00] border-transparent;
   }
+  /* Placeholder más claro */
+  input::placeholder, textarea::placeholder {
+    color: #888;
+    font-size: 16px;
+  }
+  /* Estilo específico para inputs numéricos */
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  /* Select personalizado */
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23f0f0f0' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 24px;
+    padding-right: 40px;
+  }
+  
+  /* --- Botones más grandes y accesibles --- */
   button {
     @apply transition-all duration-200;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+    min-height: 54px;
+    font-size: 18px;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 12px;
   }
   .btn-primary {
-    @apply bg-[#ff8c00] hover:bg-[#e67e00] text-white font-bold py-2 px-4 rounded-lg;
+    @apply bg-[#ff8c00] hover:bg-[#e67e00] text-white shadow-lg;
+  }
+  .btn-primary:active {
+    @apply bg-[#cc7000] transform scale-[0.98];
   }
   .btn-secondary {
-    @apply bg-[#444] hover:bg-[#555] text-white font-bold py-2 px-4 rounded-lg;
+    @apply bg-[#444] hover:bg-[#555] text-white;
   }
+  .btn-secondary:active {
+    @apply bg-[#333] transform scale-[0.98];
+  }
+  
+  /* --- Tarjetas y contenedores --- */
   .card {
-    @apply bg-[#2d2d2d] rounded-xl p-4 shadow-lg;
+    @apply bg-[#2d2d2d] rounded-xl p-5 shadow-xl;
     width: 100%;
     max-width: 100%;
   }
-  /* Contenedor principal de la app */
+  
+  /* --- Contenedor principal --- */
   .app-container {
-    @apply max-w-md mx-auto pb-20 min-h-screen bg-[#1a1a1a];
+    @apply max-w-md mx-auto pb-24 min-h-screen bg-[#1a1a1a];
     width: 100%;
+    padding: 0 12px;
   }
-  /* Ajustes para la barra de navegación */
+  
+  /* --- Barra de navegación inferior --- */
   .navbar {
     @apply fixed bottom-0 left-0 right-0 bg-[#2d2d2d] border-t border-[#444] flex justify-around items-center py-2 px-2;
     z-index: 50;
+    min-height: 70px;
   }
   .navbar a, .navbar button {
     @apply flex flex-col items-center text-xs;
     min-width: 60px;
+    min-height: 50px;
+    padding: 4px 0;
   }
   .navbar .icon {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     line-height: 1.2;
   }
   .navbar .label {
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     margin-top: 2px;
   }
-  /* Ajustes para listas y tablas responsivas */
+  
+  /* --- Lista de órdenes --- */
   .order-item {
-    @apply flex flex-wrap justify-between items-start gap-2;
+    @apply flex flex-wrap justify-between items-start gap-3;
     word-break: break-word;
   }
-  /* Evitar desbordes en tablas de reporte */
+  .order-item .order-number {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  
+  /* --- Tablas responsivas (reporte) --- */
   .table-responsive {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    margin: 0 -4px;
   }
-  /* Ajustes para los filtros de fecha */
+  .table-responsive table {
+    min-width: 600px;
+    width: 100%;
+  }
+  
+  /* --- Filtros de fecha --- */
   .filter-container {
-    @apply flex flex-wrap items-center gap-2;
+    @apply flex flex-wrap items-center gap-3;
   }
   .filter-container input[type="date"] {
-    @apply flex-1 min-w-[120px];
+    @apply flex-1 min-w-[130px];
+    min-height: 54px;
+  }
+  
+  /* --- Etiquetas y textos --- */
+  label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #ccc;
+  }
+  .text-muted {
+    color: #999;
+  }
+  
+  /* --- Ajuste para el select en edición (OrderList) --- */
+  .edit-form select,
+  .edit-form input {
+    min-height: 50px;
+  }
+  
+  /* --- Espaciado entre elementos --- */
+  .space-y-4 > * + * {
+    margin-top: 1.25rem;
+  }
+  .space-y-3 > * + * {
+    margin-top: 0.9rem;
+  }
+  .gap-2 {
+    gap: 0.75rem;
   }
 }
+
+

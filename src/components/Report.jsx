@@ -35,7 +35,7 @@ const Report = () => {
     const data = orders.map(o => ({
       'N° Orden': o.order_number,
       Comuna: o.comuna,
-      Ruta: o.ruta,
+      Ruta: o.ruta || 'Sin ruta',
       Fecha: o.fecha,
       Estado: o.estado,
       'Monto Bruto': o.monto_bruto
@@ -58,7 +58,7 @@ const Report = () => {
         const tableData = orders.map(o => [
           o.order_number,
           o.comuna,
-          o.ruta,
+          o.ruta || 'Sin ruta',
           o.fecha,
           o.estado,
           `$${o.monto_bruto}`
@@ -82,12 +82,26 @@ const Report = () => {
     }
   };
 
+  // Agrupar por ruta (texto) y ordenar
+  const routes = {};
+  orders.forEach(o => {
+    const r = o.ruta || 'Sin ruta';
+    if (!routes[r]) routes[r] = [];
+    routes[r].push(o);
+  });
+  const sortedRoutes = Object.keys(routes).sort((a, b) => {
+    // Ordenar números primero, luego letras, luego "Sin ruta"
+    if (a === 'Sin ruta') return 1;
+    if (b === 'Sin ruta') return -1;
+    return a.localeCompare(b);
+  });
+
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-bold text-primary mb-4">Reporte de entregas</h2>
+      <h2 className="text-2xl font-bold text-primary mb-4">Reporte</h2>
       <div className="flex flex-wrap gap-2 mb-4">
         <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-auto flex-1" />
-        <span className="text-gray-400">a</span>
+        <span className="text-gray-400"></span>
         <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-auto flex-1" />
         <button className="btn-secondary" onClick={() => { setStartDate(''); setEndDate(''); }}>Limpiar</button>
       </div>
@@ -106,8 +120,8 @@ const Report = () => {
 
       <div className="mt-6">
         <h3 className="font-semibold">Detalle por ruta</h3>
-        {[1,2,3].map(r => {
-          const filt = orders.filter(o => o.ruta === r);
+        {sortedRoutes.map(r => {
+          const filt = routes[r];
           const total = filt.reduce((acc, o) => acc + o.monto_bruto, 0);
           return (
             <div key={r} className="flex justify-between border-b border-[#444] py-1">

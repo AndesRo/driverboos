@@ -10,7 +10,6 @@ const OrderList = () => {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
 
-  // Cargar comunas para el select de edición
   useEffect(() => {
     const fetchComunas = async () => {
       const { data, error } = await supabase.from('tarifas').select('comuna');
@@ -96,27 +95,40 @@ const OrderList = () => {
                   value={editForm.order_number}
                   onChange={handleEditChange}
                   placeholder="N° orden"
+                  className="w-full"
                 />
-                <select name="comuna" value={editForm.comuna} onChange={handleEditChange}>
+                <select name="comuna" value={editForm.comuna} onChange={handleEditChange} className="w-full">
                   <option value="">Seleccionar comuna</option>
                   {comunas.map(c => (
                     <option key={c} value={c}>{c}</option>
                   ))}
                 </select>
-                <input
-                  name="ruta"
-                  type="number"
-                  value={editForm.ruta}
-                  onChange={handleEditChange}
-                  placeholder="Ruta"
-                />
+                {editForm.comuna === 'LAS CONDES' ? (
+                  <select name="ruta" value={editForm.ruta} onChange={handleEditChange} className="w-full">
+                    <option value="">Seleccionar ruta</option>
+                    <option value="1">Ruta 1</option>
+                    <option value="2">Ruta 2</option>
+                    <option value="3">Ruta 3</option>
+                    <option value="K">Ruta K</option>
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    name="ruta"
+                    placeholder="Sin ruta"
+                    value={editForm.ruta}
+                    onChange={handleEditChange}
+                    className="w-full"
+                  />
+                )}
                 <input
                   name="fecha"
                   type="date"
                   value={editForm.fecha}
                   onChange={handleEditChange}
+                  className="w-full"
                 />
-                <select name="estado" value={editForm.estado} onChange={handleEditChange}>
+                <select name="estado" value={editForm.estado} onChange={handleEditChange} className="w-full">
                   <option value="entregado">Entregado</option>
                   <option value="parcial">Parcial</option>
                   <option value="no_entregado">No entregado</option>
@@ -131,7 +143,9 @@ const OrderList = () => {
                 <div>
                   <span className="font-mono text-lg">{order.order_number}</span>
                   <span className="ml-2 text-sm text-gray-400">{order.comuna}</span>
-                  <div className="text-sm text-gray-400">Ruta {order.ruta} - {order.fecha}</div>
+                  <div className="text-sm text-gray-400">
+                    Ruta {order.ruta || 'Sin ruta'} - {order.fecha}
+                  </div>
                 </div>
                 <div className="text-right">
                   <div className="font-bold">${order.monto_bruto}</div>

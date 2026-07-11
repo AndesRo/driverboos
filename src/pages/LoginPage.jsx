@@ -24,7 +24,7 @@ const LoginPage = () => {
     <div className="min-h-screen flex flex-col items-center justify-between p-4 bg-[#1a1a1a]">
       <div className="flex-1 flex items-center justify-center w-full">
         <div className="card w-full max-w-md">
-          <h1 className="text-2xl font-bold text-center text-primary mb-6">Driver Control</h1>
+          <h1 className="text-2xl font-bold text-center text-primary mb-6">Driver Jumbo</h1>
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
               type="email"
@@ -48,8 +48,6 @@ const LoginPage = () => {
           </p>
         </div>
       </div>
-      
-      {/* Pie de página */}
       <footer className="mt-8 text-center text-gray-500 text-sm">
         <p>Desarrollado por <span className="text-primary">AndesDev</span> © {new Date().getFullYear()}</p>
         <p className="text-xs text-gray-600">App para conductores</p>
