@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
-        name: 'Driver Control - Jumbo',
+        name: 'Driver Control',
         short_name: 'DriverControl',
-        description: 'Gestión de entregas para conductores Jumbo',
+        description: 'Gestión de entregas para conductores',
         theme_color: '#ff8c00',
         background_color: '#1a1a1a',
         display: 'standalone',
