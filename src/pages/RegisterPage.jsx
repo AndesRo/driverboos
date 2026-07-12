@@ -141,7 +141,6 @@ const RegisterPage = () => {
         <p>
           Desarrollado por <span className="text-orange-400 font-medium">AndesDev</span> © {new Date().getFullYear()}
         </p>
-        <p className="text-xs text-gray-600">App para conductores</p>
       </footer>
     </div>
   );
