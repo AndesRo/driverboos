@@ -1,32 +1,57 @@
+// src/components/ProtectedRoute.jsx
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 
-// Define aquí tu email de administrador (puedes pasarlo como prop o usar variable de entorno)
-const ADMIN_EMAIL = 'andespart@yahoo.com'; // Cambia por tu email
+const ADMIN_EMAIL = 'andespart@yahoo.com'; // Cambia por tu correo
 
 const ProtectedRoute = ({ children }) => {
-  const { user, loading, hasActiveSubscription } = useAuth();
+  const { user, loading } = useAuth();
+  const [suscripcionValida, setSuscripcionValida] = useState(true);
+  const [checking, setChecking] = useState(true);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#1a1a1a] text-white">
-        <p>Cargando...</p>
-      </div>
-    );
+  useEffect(() => {
+    const verificarSuscripcion = async () => {
+      if (!user) {
+        setChecking(false);
+        return;
+      }
+
+      // Si es administrador, siempre válido sin consultar BD
+      if (user.email === ADMIN_EMAIL) {
+        setSuscripcionValida(true);
+        setChecking(false);
+        return;
+      }
+
+      // Para otros usuarios, consultar suscripción
+      const { data, error } = await supabase
+        .from('suscripciones')
+        .select('estado')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error || !data || data.estado !== 'activa') {
+        setSuscripcionValida(false);
+      } else {
+        setSuscripcionValida(true);
+      }
+      setChecking(false);
+    };
+
+    verificarSuscripcion();
+  }, [user]);
+
+  if (loading || checking) {
+    return <div className="p-4 text-center">Cargando...</div>;
   }
 
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  // Si es el administrador, saltar validación de suscripción
-  if (user.email === ADMIN_EMAIL) {
-    return children;
-  }
-
-  // Para otros usuarios, verificar suscripción
-  if (!hasActiveSubscription) {
-    // Puedes redirigir a una página de "suscripción vencida"
+  if (!suscripcionValida && user.email !== ADMIN_EMAIL) {
     return <Navigate to="/suscripcion-vencida" replace />;
   }
 
