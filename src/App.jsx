@@ -20,9 +20,12 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+          {/* Rutas públicas */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/subscription-blocked" element={<SubscriptionBlocked />} />
+          
+          {/* Ruta de administración - FUERA del ProtectedRoute */}
           <Route path="/admin" element={
             <AdminRoute>
               <AdminLayout />
@@ -31,6 +34,8 @@ function App() {
             <Route index element={<AdminDashboard />} />
             <Route path="users" element={<AdminUsers />} />
           </Route>
+          
+          {/* Rutas protegidas por suscripción */}
           <Route path="/*" element={
             <ProtectedRoute>
               <div className="app-container">
