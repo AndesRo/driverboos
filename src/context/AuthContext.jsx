@@ -5,52 +5,80 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [suscripcion, setSuscripcion] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [suscripcion, setSuscripcion] = useState(null);
+  const [isSubscriptionActive, setIsSubscriptionActive] = useState(false);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(true);
 
-  const fetchSuscripcion = async (userId) => {
-    if (!userId) return null;
-    const { data, error } = await supabase
-      .from('suscripciones')
-      .select('*')
-      .eq('user_id', userId)
-      .maybeSingle();
-    if (error) {
-      console.error('Error al obtener suscripción:', error);
-      return null;
+  const loadSubscription = async (userId) => {
+    if (!userId) {
+      setSuscripcion(null);
+      setIsSubscriptionActive(false);
+      setSubscriptionLoading(false);
+      return;
     }
-    return data;
+    setSubscriptionLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('suscripciones')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (error) throw error;
+      setSuscripcion(data);
+      if (data && data.estado === 'activa' && data.fecha_vencimiento) {
+        const hoy = new Date();
+        const vencimiento = new Date(data.fecha_vencimiento);
+        hoy.setHours(0,0,0,0);
+        vencimiento.setHours(0,0,0,0);
+        setIsSubscriptionActive(vencimiento >= hoy);
+      } else {
+        setIsSubscriptionActive(false);
+      }
+    } catch (error) {
+      console.error('Error cargando suscripción:', error);
+      setIsSubscriptionActive(false);
+    } finally {
+      setSubscriptionLoading(false);
+    }
   };
 
   useEffect(() => {
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      const user = session?.user ?? null;
-      setUser(user);
-      if (user) {
-        const sub = await fetchSuscripcion(user.id);
-        setSuscripcion(sub);
-      } else {
-        setSuscripcion(null);
-      }
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
       setLoading(false);
+      if (currentUser) {
+        await loadSubscription(currentUser.id);
+      } else {
+        setSubscriptionLoading(false);
+      }
     };
     getSession();
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const user = session?.user ?? null;
-      setUser(user);
-      if (user) {
-        const sub = await fetchSuscripcion(user.id);
-        setSuscripcion(sub);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      setLoading(false);
+      if (currentUser) {
+        await loadSubscription(currentUser.id);
       } else {
         setSuscripcion(null);
+        setIsSubscriptionActive(false);
+        setSubscriptionLoading(false);
       }
-      setLoading(false);
     });
 
     return () => listener?.subscription?.unsubscribe();
   }, []);
+
+  const refreshSubscription = async () => {
+    if (user) {
+      await loadSubscription(user.id);
+    }
+  };
 
   const login = async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -66,33 +94,19 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     await supabase.auth.signOut();
-    setSuscripcion(null);
-  };
-
-  // Verificar si la suscripción está activa
-  const isSubscriptionActive = () => {
-    if (!suscripcion) return false;
-    if (suscripcion.estado !== 'activa') return false;
-    const now = new Date();
-    const vencimiento = new Date(suscripcion.fecha_vencimiento);
-    return now <= vencimiento;
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      suscripcion, 
-      loading, 
-      login, 
-      register, 
-      logout,
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      suscripcion,
       isSubscriptionActive,
-      refreshSuscripcion: async () => {
-        if (user) {
-          const sub = await fetchSuscripcion(user.id);
-          setSuscripcion(sub);
-        }
-      }
+      subscriptionLoading,
+      refreshSubscription,
+      login,
+      register,
+      logout
     }}>
       {children}
     </AuthContext.Provider>
