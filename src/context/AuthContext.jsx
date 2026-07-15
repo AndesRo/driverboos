@@ -25,6 +25,23 @@ export const AuthProvider = ({ children }) => {
         .eq('user_id', userId)
         .maybeSingle();
 
+      // Si no existe, la creamos (por si el trigger falló)
+      if (error && error.code === 'PGRST116') {
+        const { data: newSub, error: insertError } = await supabase
+          .from('suscripciones')
+          .insert([{ user_id: userId, estado: 'vencida' }])
+          .select()
+          .single();
+        if (!insertError) {
+          setSuscripcion(newSub);
+          setIsSubscriptionActive(false);
+        } else {
+          console.error('Error al crear suscripción:', insertError);
+        }
+        setSubscriptionLoading(false);
+        return;
+      }
+
       if (error) throw error;
       setSuscripcion(data);
       if (data && data.estado === 'activa' && data.fecha_vencimiento) {
@@ -89,6 +106,13 @@ export const AuthProvider = ({ children }) => {
   const register = async (email, password) => {
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) throw error;
+    // Crear suscripción manualmente
+    if (data.user) {
+      const { error: subError } = await supabase
+        .from('suscripciones')
+        .insert([{ user_id: data.user.id, estado: 'vencida' }]);
+      if (subError) console.warn('Error al crear suscripción en registro:', subError);
+    }
     return data;
   };
 
