@@ -51,7 +51,7 @@ const OrderForm = ({ onOrderAdded }) => {
         .insert({
           order_number: form.order_number,
           comuna: form.comuna,
-          ruta: form.ruta || 'Sin ruta',
+          ruta: form.ruta || 'Sin ruta', // Si no selecciona, usamos "Sin ruta"
           fecha: form.fecha,
           estado: form.estado,
           notas: form.notas || '',
@@ -76,7 +76,6 @@ const OrderForm = ({ onOrderAdded }) => {
           });
         if (extraError) {
           console.warn('Error al registrar extra peso:', extraError);
-          // No detenemos el flujo, solo advertimos
         }
       }
 
@@ -127,15 +126,20 @@ const OrderForm = ({ onOrderAdded }) => {
         ))}
       </select>
 
-      {/* Campo ruta libre para cualquier comuna */}
-      <input
-        type="text"
+      {/* Selector de ruta para todas las comunas */}
+      <select
         name="ruta"
-        placeholder="Ruta (ej: 1, 2, 3, K, o personalizada)"
         value={form.ruta}
         onChange={handleChange}
         className="w-full"
-      />
+      >
+        <option value="">Seleccionar ruta</option>
+        <option value="1">Ruta 1</option>
+        <option value="2">Ruta 2</option>
+        <option value="3">Ruta 3</option>
+        <option value="K">Ruta K (Kennedy)</option>
+        <option value="Sin ruta">Sin ruta</option>
+      </select>
 
       <input
         type="date"
@@ -157,7 +161,6 @@ const OrderForm = ({ onOrderAdded }) => {
         <option value="no_entregado">No entregado</option>
       </select>
 
-      {/* Notas */}
       <textarea
         name="notas"
         placeholder="Notas (opcional)"
@@ -167,7 +170,6 @@ const OrderForm = ({ onOrderAdded }) => {
         className="w-full"
       />
 
-      {/* Extra peso checkbox */}
       <label className="flex items-center gap-2 text-gray-300 cursor-pointer">
         <input
           type="checkbox"
