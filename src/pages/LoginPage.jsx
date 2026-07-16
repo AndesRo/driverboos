@@ -40,7 +40,7 @@ const LoginPage = () => {
             Driver<span className="text-orange-500">Control</span>
           </h1>
           <p className="text-lg text-gray-400 drop-shadow-md mt-2 font-light">
-            Plataforma de gestión de entregas
+            Plataforma de gestión de entregas (beta)
           </p>
         </div>
 
