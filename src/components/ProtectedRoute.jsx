@@ -1,21 +1,29 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom'; // <-- Importa useLocation
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
+  const location = useLocation(); // <-- Obtiene la ruta actual
   const [suscripcion, setSuscripcion] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     const checkAccess = async () => {
+      // Si la ruta actual es la de confirmación, no hacemos ninguna verificación
+      if (location.pathname === '/confirmacion-exitosa') {
+        setChecking(false);
+        return;
+      }
+
       if (!user) {
         setChecking(false);
         return;
       }
 
+      // ... (el resto de la lógica de verificación de admin y suscripción se mantiene igual)
       // 1. Verificar si es administrador
       const { data: adminData } = await supabase
         .from('admin_users')
@@ -26,7 +34,6 @@ const ProtectedRoute = ({ children }) => {
       const admin = !!adminData;
       setIsAdmin(admin);
 
-      // Si es administrador, permitir acceso sin verificar suscripción
       if (admin) {
         setChecking(false);
         return;
@@ -48,7 +55,6 @@ const ProtectedRoute = ({ children }) => {
       if (data) {
         const hoy = new Date();
         const vencimiento = new Date(data.fecha_vencimiento);
-        // Actualizar automáticamente a vencida si expiró
         if (vencimiento < hoy && (data.estado === 'prueba' || data.estado === 'activa')) {
           await supabase
             .from('suscripciones')
@@ -64,7 +70,7 @@ const ProtectedRoute = ({ children }) => {
     };
 
     checkAccess();
-  }, [user]);
+  }, [user, location.pathname]); // <-- Agrega location.pathname como dependencia
 
   if (loading || checking) {
     return <div className="flex items-center justify-center min-h-screen">Cargando...</div>;
@@ -84,12 +90,10 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/subscription-blocked" replace />;
   }
 
-  // Si la suscripción está activa o en prueba, permitir acceso
   if (suscripcion.estado === 'prueba' || suscripcion.estado === 'activa') {
     return children;
   }
 
-  // Fallback
   return <Navigate to="/subscription-blocked" replace />;
 };
 
