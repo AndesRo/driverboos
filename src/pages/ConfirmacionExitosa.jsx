@@ -1,15 +1,15 @@
+// src/pages/ConfirmacionExitosa.jsx
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const ConfirmacionExitosa = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
   const [countdown, setCountdown] = useState(3);
 
   useEffect(() => {
-    // Si el usuario está autenticado, redirigir al home después de 3 segundos
+    if (authLoading) return; // Esperar a que la sesión esté lista
     if (user) {
       const interval = setInterval(() => {
         setCountdown((prev) => {
@@ -23,13 +23,12 @@ const ConfirmacionExitosa = () => {
       }, 1000);
       return () => clearInterval(interval);
     }
-    setLoading(false);
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
 
-  if (loading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#1a1a1a]">
-        <p className="text-white text-lg">Cargando...</p>
+        <p className="text-white text-lg">Verificando tu cuenta...</p>
       </div>
     );
   }
