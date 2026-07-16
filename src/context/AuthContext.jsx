@@ -28,10 +28,18 @@ export const AuthProvider = ({ children }) => {
 
       if (error) {
         console.error('Error al cargar suscripción:', error);
-        // Si la tabla no existe o error, intentamos crear una suscripción por defecto
+        setSuscripcion(null);
+        setIsSubscriptionActive(false);
+        setSubscriptionLoading(false);
+        return;
+      }
+
+      if (!data) {
+        // No existe suscripción (caso extremo): creamos una por defecto con estado 'vencida'
+        // Esto no debería ocurrir si el trigger funciona correctamente.
         const { data: newSub, error: insertError } = await supabase
           .from('suscripciones')
-          .insert({ user_id: userId, estado: 'vencida' })
+          .insert({ user_id: userId, estado: 'vencida', tipo: 'vencida', fecha_inicio: new Date().toISOString().split('T')[0], fecha_vencimiento: new Date().toISOString().split('T')[0] })
           .select()
           .single();
         if (!insertError) {
@@ -46,37 +54,36 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      if (!data) {
-        // No existe suscripción, la creamos
-        const { data: newSub, error: insertError } = await supabase
-          .from('suscripciones')
-          .insert({ user_id: userId, estado: 'vencida' })
-          .select()
-          .single();
-        if (!insertError) {
-          setSuscripcion(newSub);
-          setIsSubscriptionActive(false);
-        } else {
-          setSuscripcion(null);
-          setIsSubscriptionActive(false);
+      // Verificar si la suscripción ha expirado y actualizar si es necesario
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+      const vencimiento = data.fecha_vencimiento ? new Date(data.fecha_vencimiento) : null;
+      let estadoActual = data.estado;
+
+      if (vencimiento) {
+        vencimiento.setHours(0, 0, 0, 0);
+        // Si la fecha de vencimiento es menor a hoy y el estado es 'activa' o 'prueba', actualizar a 'vencida'
+        if (vencimiento < hoy && (estadoActual === 'activa' || estadoActual === 'prueba')) {
+          console.log(`Suscripción expirada. Actualizando a vencida.`);
+          const { error: updateError } = await supabase
+            .from('suscripciones')
+            .update({ estado: 'vencida' })
+            .eq('id', data.id);
+          if (!updateError) {
+            estadoActual = 'vencida';
+            data.estado = 'vencida';
+          } else {
+            console.error('Error al actualizar suscripción a vencida:', updateError);
+          }
         }
-        setSubscriptionLoading(false);
-        return;
       }
 
       setSuscripcion(data);
 
-      const hoy = new Date();
-      hoy.setHours(0, 0, 0, 0);
-      const vencimiento = data.fecha_vencimiento ? new Date(data.fecha_vencimiento) : null;
-      if (vencimiento) {
-        vencimiento.setHours(0, 0, 0, 0);
-        const activa = data.estado === 'activa' && vencimiento >= hoy;
-        setIsSubscriptionActive(activa);
-        console.log(`Suscripción: ${activa ? 'ACTIVA' : 'VENCIDA'} (vencimiento: ${data.fecha_vencimiento})`);
-      } else {
-        setIsSubscriptionActive(false);
-      }
+      // Determinar si la suscripción está activa: estado 'activa' o 'prueba' y fecha de vencimiento válida
+      const activa = (estadoActual === 'activa' || estadoActual === 'prueba') && vencimiento && vencimiento >= hoy;
+      setIsSubscriptionActive(activa);
+      console.log(`Suscripción: ${activa ? 'ACTIVA' : 'INACTIVA'} (estado: ${estadoActual}, vencimiento: ${data.fecha_vencimiento})`);
     } catch (error) {
       console.error('Error inesperado en loadSubscription:', error);
       setSuscripcion(null);
@@ -147,16 +154,16 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  const register = async (email, password) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+  const register = async (email, password, metadata) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: metadata
+      }
+    });
     if (error) throw error;
-    if (data.user) {
-      // Crear suscripción por defecto
-      const { error: subError } = await supabase
-        .from('suscripciones')
-        .insert({ user_id: data.user.id, estado: 'vencida' });
-      if (subError) console.warn('Error al crear suscripción en registro:', subError);
-    }
+    // No creamos suscripción aquí; confiamos en el trigger de la base de datos.
     return data;
   };
 
