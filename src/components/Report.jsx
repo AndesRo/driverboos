@@ -203,7 +203,7 @@ const Report = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-bold text-primary mb-4">Reporte financiero</h2>
+      <h2 className="text-2xl font-bold text-primary mb-4">Reportes</h2>
       <div className="flex flex-wrap gap-2 mb-4">
         <input
           type="date"

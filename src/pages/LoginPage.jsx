@@ -36,9 +36,10 @@ const LoginPage = () => {
       <div className="flex-1 flex flex-col items-center justify-center w-full">
         {/* Mensaje de bienvenida */}
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-white drop-shadow-lg tracking-tight">
-            Driver<span className="text-orange-500">Boos</span>
-          </h1>
+ <h1 className="font-[Poppins] text-7xl font-extrabold tracking-[-0.04em] leading-none">
+  <span className="text-white">Driver</span>
+  <span className="text-orange-500">Boos</span>
+</h1>
           <p className="text-lg text-gray-400 drop-shadow-md mt-2 font-light">
             Plataforma de gestión de entregas (beta)
           </p>
