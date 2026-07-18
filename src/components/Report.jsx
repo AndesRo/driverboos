@@ -8,9 +8,11 @@ import autoTable from 'jspdf-autotable';
 const Report = () => {
   const { user } = useAuth();
   const [ordersWithExtras, setOrdersWithExtras] = useState([]);
+  const [extrasSummary, setExtrasSummary] = useState([]);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [totalBruto, setTotalBruto] = useState(0);
+  const [totalExtras, setTotalExtras] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -24,7 +26,7 @@ const Report = () => {
     setError(null);
 
     try {
-      // Construir la consulta con la relación correcta
+      // 1. Obtener órdenes con sus extras
       let query = supabase
         .from('orders')
         .select(`
@@ -49,20 +51,32 @@ const Report = () => {
         return;
       }
 
-      if (!orders || orders.length === 0) {
-        setOrdersWithExtras([]);
-        setTotalBruto(0);
-        setLoading(false);
-        return;
+      // 2. Obtener todos los extras (para el resumen)
+      let extrasQuery = supabase
+        .from('extras')
+        .select('*')
+        .eq('user_id', user.id);
+
+      if (startDate) {
+        extrasQuery = extrasQuery.gte('fecha', startDate);
+      }
+      if (endDate) {
+        extrasQuery = extrasQuery.lte('fecha', endDate);
       }
 
-      // Procesar datos
-      let total = 0;
-      const enriched = orders.map((order) => {
+      const { data: extrasData, error: extrasError } = await extrasQuery.order('fecha', { ascending: false });
+
+      if (extrasError) {
+        console.error('Error al obtener extras:', extrasError);
+      }
+
+      // 3. Procesar órdenes
+      let totalBrutoOrdenes = 0;
+      const enrichedOrders = (orders || []).map((order) => {
         const extras = order.extras || [];
-        const totalExtras = extras.reduce((sum, e) => sum + (e.monto || 0), 0);
-        const totalOrden = (order.monto_bruto || 0) + totalExtras;
-        total += totalOrden;
+        const totalExtrasPorOrden = extras.reduce((sum, e) => sum + (e.monto || 0), 0);
+        const totalOrden = (order.monto_bruto || 0) + totalExtrasPorOrden;
+        totalBrutoOrdenes += totalOrden;
         return {
           ...order,
           extras,
@@ -70,8 +84,25 @@ const Report = () => {
         };
       });
 
-      setOrdersWithExtras(enriched);
-      setTotalBruto(total);
+      // 4. Procesar extras para resumen por tipo
+      const summaryMap = {};
+      (extrasData || []).forEach((extra) => {
+        const tipo = extra.tipo || 'sin_tipo';
+        if (!summaryMap[tipo]) {
+          summaryMap[tipo] = { tipo, cantidad: 0, total: 0 };
+        }
+        summaryMap[tipo].cantidad += 1;
+        summaryMap[tipo].total += extra.monto || 0;
+      });
+      const summaryArray = Object.values(summaryMap);
+
+      const totalExtrasMonto = summaryArray.reduce((sum, item) => sum + item.total, 0);
+      const totalBrutoGeneral = totalBrutoOrdenes + totalExtrasMonto;
+
+      setOrdersWithExtras(enrichedOrders);
+      setExtrasSummary(summaryArray);
+      setTotalBruto(totalBrutoGeneral);
+      setTotalExtras(totalExtrasMonto);
     } catch (err) {
       console.error('Error inesperado:', err);
       setError('Error inesperado al cargar datos.');
@@ -109,7 +140,7 @@ const Report = () => {
   const exportPDF = () => {
     try {
       const doc = new jsPDF();
-      doc.text('Reporte de entregas', 14, 16);
+      doc.text('Reporte de entregas y extras', 14, 16);
       doc.text(`Total bruto (órdenes + extras): $${totalBruto}`, 14, 26);
       doc.text(`Retención (15.25%): $${retencion.toFixed(0)}`, 14, 32);
       doc.text(`Neto: $${neto.toFixed(0)}`, 14, 38);
@@ -136,7 +167,7 @@ const Report = () => {
           headStyles: { fillColor: [255, 140, 0] },
         });
       } else {
-        doc.text('No hay datos para el período seleccionado.', 14, 50);
+        doc.text('No hay órdenes para el período seleccionado.', 14, 50);
       }
 
       doc.save(`reporte_${new Date().toISOString().slice(0, 10)}.pdf`);
@@ -182,13 +213,39 @@ const Report = () => {
         </button>
       </div>
 
-      <div className="card space-y-2">
+      {/* Resumen de órdenes y extras */}
+      <div className="card space-y-2 mb-4">
+        <h3 className="font-semibold text-lg">Resumen de órdenes</h3>
         <div className="flex justify-between">
           <span>Total órdenes</span>
           <span>{ordersWithExtras.length}</span>
         </div>
         <div className="flex justify-between">
-          <span>Total bruto (órdenes + extras)</span>
+          <span>Monto bruto de órdenes</span>
+          <span>${ordersWithExtras.reduce((acc, o) => acc + (o.monto_bruto || 0), 0)}</span>
+        </div>
+        <hr className="border-[#444]" />
+        <h3 className="font-semibold text-lg">Resumen de extras</h3>
+        {extrasSummary.length === 0 ? (
+          <p className="text-gray-400">No hay extras registrados en este período.</p>
+        ) : (
+          extrasSummary.map((item) => (
+            <div key={item.tipo} className="flex justify-between">
+              <span>
+                {item.tipo === 'extra_peso' && 'Extra peso'}
+                {item.tipo === 'tag' && 'Tag'}
+                {item.tipo === 'capacitacion' && 'Capacitación'}
+                {item.tipo === 'sin_moradores' && 'Sin moradores'}
+                {!['extra_peso', 'tag', 'capacitacion', 'sin_moradores'].includes(item.tipo) && item.tipo}
+                {' (' + item.cantidad + ')'}
+              </span>
+              <span>${item.total}</span>
+            </div>
+          ))
+        )}
+        <hr className="border-[#444]" />
+        <div className="flex justify-between font-bold">
+          <span>Total bruto general (órdenes + extras)</span>
           <span>${totalBruto}</span>
         </div>
         <div className="flex justify-between">
@@ -201,6 +258,7 @@ const Report = () => {
         </div>
       </div>
 
+      {/* Botones de exportación */}
       <div className="flex gap-2 mt-4">
         <button className="btn-primary flex-1" onClick={exportExcel}>
           📊 Excel
@@ -210,27 +268,46 @@ const Report = () => {
         </button>
       </div>
 
+      {/* Tabla de órdenes con extras */}
       <div className="mt-6">
-        <h3 className="font-semibold">Detalle por orden</h3>
+        <h3 className="font-semibold">Detalle de órdenes</h3>
         {ordersWithExtras.length === 0 ? (
           <p className="text-center text-gray-400 mt-2">No hay órdenes para el período seleccionado.</p>
         ) : (
-          ordersWithExtras.map((o) => (
-            <div key={o.id} className="border-b border-[#444] py-2">
-              <div className="flex justify-between">
-                <span className="font-mono">{o.order_number}</span>
-                <span>${o.totalOrden}</span>
-              </div>
-              <div className="text-sm text-gray-400">
-                {o.comuna} - Ruta {o.ruta || 'Sin ruta'} - {o.fecha}
-                {o.extras.length > 0 && (
-                  <span className="ml-2 text-primary">
-                    (+ {o.extras.map((e) => `${e.tipo}: $${e.monto}`).join(', ')})
-                  </span>
-                )}
-              </div>
-            </div>
-          ))
+          <div className="table-responsive">
+            <table className="w-full text-sm">
+              <thead className="bg-[#2d2d2d]">
+                <tr>
+                  <th className="p-2 text-left">N°</th>
+                  <th className="p-2 text-left">Comuna</th>
+                  <th className="p-2 text-left">Ruta</th>
+                  <th className="p-2 text-left">Fecha</th>
+                  <th className="p-2 text-left">Estado</th>
+                  <th className="p-2 text-left">Bruto</th>
+                  <th className="p-2 text-left">Extra Peso</th>
+                  <th className="p-2 text-left">Tag</th>
+                  <th className="p-2 text-left">Capacitación</th>
+                  <th className="p-2 text-left">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ordersWithExtras.map((o) => (
+                  <tr key={o.id} className="border-b border-[#444]">
+                    <td className="p-2">{o.order_number}</td>
+                    <td className="p-2">{o.comuna}</td>
+                    <td className="p-2">{o.ruta || 'Sin ruta'}</td>
+                    <td className="p-2">{o.fecha}</td>
+                    <td className="p-2">{o.estado}</td>
+                    <td className="p-2">${o.monto_bruto}</td>
+                    <td className="p-2">${o.extras.find((e) => e.tipo === 'extra_peso')?.monto || 0}</td>
+                    <td className="p-2">${o.extras.find((e) => e.tipo === 'tag')?.monto || 0}</td>
+                    <td className="p-2">${o.extras.find((e) => e.tipo === 'capacitacion')?.monto || 0}</td>
+                    <td className="p-2 font-bold">${o.totalOrden}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
