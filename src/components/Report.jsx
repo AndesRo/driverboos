@@ -15,7 +15,7 @@ const Report = () => {
   const fetchData = async () => {
     if (!user) return;
 
-    const query = supabase
+    let query = supabase
       .from('orders')
       .select(`
         *,
@@ -25,6 +25,7 @@ const Report = () => {
 
     if (startDate) query = query.gte('fecha', startDate);
     if (endDate) query = query.lte('fecha', endDate);
+
     const { data: orders, error } = await query.order('fecha', { ascending: false });
 
     if (error) {
