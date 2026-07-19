@@ -36,7 +36,7 @@ const Navbar = () => {
       </NavLink>
       <NavLink to="/formularios" className={({ isActive }) => (isActive ? 'text-primary' : 'text-gray-400')}>
         <span className="icon">📝</span>
-        <span className="label">Formularios</span>
+        <span className="label">Contacto</span>
       </NavLink>
       <NavLink to="/reporte" className={({ isActive }) => (isActive ? 'text-primary' : 'text-gray-400')}>
         <span className="icon">📊</span>

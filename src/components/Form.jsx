@@ -32,7 +32,6 @@ const Form = () => {
       <div className="card">
         <h3 className="font-semibold text-lg text-white mb-3">Datos de la boleta</h3>
         <div className="space-y-2 text-gray-300">
-          <p><span className="font-medium text-gray-400">Fecha:</span> {today}</p>
           <p><span className="font-medium text-gray-400">A nombre de:</span> INVERSIONES ASINARA SPA</p>
           <p><span className="font-medium text-gray-400">RUT:</span> 76.456.187-2</p>
           <p><span className="font-medium text-gray-400">Dirección:</span> AV. ANDRES BELLO 2777 Piso 19 Oficina 01, LAS CONDES</p>
@@ -69,7 +68,7 @@ const Form = () => {
 
       {/* Formularios externos */}
       <div className="card">
-        <h3 className="font-semibold text-lg text-white mb-3">Formularios externos</h3>
+        <h3 className="font-semibold text-lg text-white mb-3"></h3>
         <div className="flex flex-col sm:flex-row gap-3">
           <a
             href="https://boosmap.typeform.com/to/sFgws2bM"
