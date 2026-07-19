@@ -15,13 +15,25 @@
     width: 100%;
     overflow-x: hidden;
   }
+  html {
+    /* Evita que Safari iOS reescale el texto en landscape y rompa el layout */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
   body {
     @apply bg-[#1a1a1a] text-[#f0f0f0];
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  
+
+  /* Cualquier imagen/video dentro de una card nunca debe desbordar */
+  img, video, svg {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
   /* --- Checkboxes --- */
   input[type="checkbox"] {
     width: 24px;
@@ -30,12 +42,13 @@
     cursor: pointer;
     min-height: unset !important;
     padding: 0;
+    flex-shrink: 0;
   }
 
-  /* --- Ajustes para inputs, selects y textareas (tamaño aumentado) --- */
+  /* --- Inputs, selects y textareas (tamaño táctil por defecto = móvil) --- */
   input, select, textarea {
     @apply bg-[#2d2d2d] text-[#f0f0f0] border border-[#555] rounded-lg px-4 py-3 w-full;
-    font-size: 18px;
+    font-size: 18px; /* >=16px evita el auto-zoom de iOS al enfocar */
     line-height: 1.5;
     -webkit-appearance: none;
     appearance: none;
@@ -64,8 +77,8 @@
     background-size: 24px;
     padding-right: 40px;
   }
-  
-  /* --- Botones más grandes y accesibles --- */
+
+  /* --- Botones (base = táctil, móvil) --- */
   button {
     @apply transition-all duration-200;
     cursor: pointer;
@@ -95,53 +108,39 @@
     padding: 6px 12px;
     border-radius: 6px;
   }
-  
+
   /* --- Tarjetas y contenedores --- */
   .card {
     @apply bg-[#2d2d2d] rounded-xl p-5 shadow-xl;
     width: 100%;
     max-width: 100%;
   }
-  
+
   /* --- Contenedor principal --- */
   .app-container {
-    @apply mx-auto min-h-screen bg-[#1a1a1a] pb-24;
+    @apply mx-auto min-h-screen bg-[#1a1a1a];
     width: 100%;
     max-width: 100%;
     padding: 0 16px;
+    /* pb-24 + margen extra por si el navbar tiene home-indicator en iOS */
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom));
   }
-  
-  /* Ajuste para pantallas grandes */
-  @media (min-width: 768px) {
-    .app-container {
-      max-width: 720px;
-      padding: 0 24px;
-    }
-  }
-  @media (min-width: 1024px) {
-    .app-container {
-      max-width: 960px;
-      padding: 0 32px;
-    }
-  }
-  @media (min-width: 1280px) {
-    .app-container {
-      max-width: 1152px;
-      padding: 0 40px;
-    }
-  }
-  
+
   /* --- Barra de navegación inferior --- */
   .navbar {
     @apply fixed bottom-0 left-0 right-0 bg-[#2d2d2d] border-t border-[#444] flex justify-around items-center py-2 px-2;
     z-index: 50;
     min-height: 70px;
+    /* Respeta el home indicator / gesture bar de iPhone */
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
   }
   .navbar a, .navbar button {
     @apply flex flex-col items-center text-xs;
     min-width: 60px;
     min-height: 50px;
     padding: 4px 0;
+    /* los botones del navbar no deben heredar el tamaño táctil de "button" */
+    font-size: inherit;
   }
   .navbar .icon {
     font-size: 1.8rem;
@@ -150,8 +149,9 @@
   .navbar .label {
     font-size: 0.7rem;
     margin-top: 2px;
+    white-space: nowrap;
   }
-  
+
   /* --- Lista de órdenes --- */
   .order-item {
     @apply flex flex-wrap justify-between items-start gap-3;
@@ -161,7 +161,7 @@
     font-size: 1.1rem;
     font-weight: 600;
   }
-  
+
   /* --- Tablas responsivas (reporte) --- */
   .table-responsive {
     overflow-x: auto;
@@ -172,16 +172,17 @@
     min-width: 600px;
     width: 100%;
   }
-  
+
   /* --- Filtros de fecha --- */
   .filter-container {
     @apply flex flex-wrap items-center gap-3;
   }
   .filter-container input[type="date"] {
-    @apply flex-1 min-w-[130px];
+    @apply flex-1;
+    min-width: 130px;
     min-height: 54px;
   }
-  
+
   /* --- Etiquetas y textos --- */
   label {
     font-size: 1rem;
@@ -191,13 +192,13 @@
   .text-muted {
     color: #999;
   }
-  
+
   /* --- Ajuste para el select en edición (OrderList) --- */
   .edit-form select,
   .edit-form input {
     min-height: 50px;
   }
-  
+
   /* --- Espaciado entre elementos --- */
   .space-y-4 > * + * {
     margin-top: 1.25rem;
@@ -207,6 +208,92 @@
   }
   .gap-2 {
     gap: 0.75rem;
+  }
+}
+
+/* ============================================================
+   MÓVILES MUY PEQUEÑOS (<=380px, ej. iPhone SE)
+   Reduce ligeramente paddings y tipografía de filtros de fecha
+   para que quepan sin desbordar
+   ============================================================ */
+@media (max-width: 380px) {
+  .app-container {
+    padding: 0 12px;
+  }
+  .filter-container input[type="date"] {
+    min-width: 100%;
+    flex-basis: 100%;
+  }
+  .navbar .label {
+    font-size: 0.62rem;
+  }
+  .navbar .icon {
+    font-size: 1.5rem;
+  }
+}
+
+/* ============================================================
+   LANDSCAPE EN MÓVIL (poca altura, ej. teléfono acostado)
+   El navbar fijo de 70px+ deja de tener sentido: se compacta
+   ============================================================ */
+@media (max-height: 480px) and (orientation: landscape) {
+  .navbar {
+    min-height: 52px;
+    padding-top: 2px;
+    padding-bottom: calc(2px + env(safe-area-inset-bottom));
+  }
+  .navbar .icon {
+    font-size: 1.3rem;
+  }
+  .navbar .label {
+    display: none; /* solo iconos para ganar espacio vertical */
+  }
+  .app-container {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  }
+}
+
+/* ============================================================
+   TABLET / LAPTOP (>=768px)
+   Ya no es solo "dedo en pantalla": se puede reducir el tamaño
+   táctil sin perder usabilidad con mouse
+   ============================================================ */
+@media (min-width: 768px) {
+  .app-container {
+    max-width: 720px;
+    padding: 0 24px;
+  }
+  input, select, textarea {
+    font-size: 15px;
+    min-height: 44px;
+    @apply py-2;
+  }
+  button {
+    font-size: 15px;
+    min-height: 44px;
+    padding: 10px 20px;
+  }
+  .filter-container input[type="date"] {
+    min-height: 44px;
+  }
+  /* En laptop el navbar inferior fijo suele estorbar; si tu app
+     tiene navegación lateral/superior en desktop, aquí puedes
+     ocultarlo. Se deja comentado por si aún lo usas en tablet:
+  .navbar { display: none; }
+  */
+}
+
+@media (min-width: 1024px) {
+  .app-container {
+    max-width: 960px;
+    padding: 0 32px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .app-container {
+    max-width: 1152px;
+    padding: 0 40px;
   }
 }
 

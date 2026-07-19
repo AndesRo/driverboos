@@ -8,10 +8,25 @@
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
 
     <!-- Responsive -->
+    <!--
+      viewport-fit=cover es la clave que faltaba: sin esto, env(safe-area-inset-bottom)
+      en el CSS no se activa y tu navbar fijo puede quedar tapado por el home indicator
+      en iPhones con notch (X en adelante).
+
+      Se quita "maximum-scale=1.0, user-scalable=no" porque bloquea el zoom por completo
+      (problema de accesibilidad). Si de verdad lo necesitas para que se sienta como app
+      nativa, la variante restrictiva queda comentada abajo.
+    -->
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
+    <!--
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    -->
 
     <!-- PWA -->
     <meta name="theme-color" content="#ff8c00" />
@@ -41,7 +56,6 @@
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
 
-    <!-- CORREGIDO -->
     <meta
       property="og:url"
       content="https://driverboos.vercel.app/"
