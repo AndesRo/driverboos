@@ -31,7 +31,7 @@ const Form = () => {
       <div className="card space-y-6">
         {/* Sección 1: Datos de la boleta */}
         <div>
-          <h3 className="font-semibold text-lg text-white mb-3">Datos de la boleta</h3>
+          <h3 className="font-semibold text-lg text-white mb-3">Datos de la boleta de honorarios</h3>
           <div className="space-y-2 text-gray-300">
             <p><span className="font-medium text-gray-400">Fecha:</span> {today}</p>
             <p><span className="font-medium text-gray-400">A nombre de:</span> INVERSIONES ASINARA SPA</p>
@@ -46,7 +46,7 @@ const Form = () => {
 
         {/* Sección 2: Prestación y acciones */}
         <div>
-          <h3 className="font-semibold text-lg text-white mb-3"></h3>
+          <h3 className="font-semibold text-lg text-white mb-3">Prestación y acciones</h3>
           <p className="text-gray-300 mb-4"></p>
 
           <div className="flex flex-col sm:flex-row gap-3">
