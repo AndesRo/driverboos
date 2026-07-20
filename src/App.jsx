@@ -11,6 +11,7 @@ import OrderList from './components/OrderList';
 import Report from './components/Report';
 import Form from './components/Form';
 import AdminUsers from './components/AdminUsers';
+import ResetPassword from './pages/ResetPassword';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/confirmacion-exitosa" element={<ConfirmacionExitosa />} />
           <Route path="/subscription-blocked" element={<SubscriptionBlocked />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/*" element={
             <ProtectedRoute>
               <div className="app-container">
