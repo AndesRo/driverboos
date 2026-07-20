@@ -69,7 +69,12 @@ const LoginPage = () => {
       <div className="flex-1 flex flex-col items-center justify-center w-full">
         {/* Mensaje de bienvenida */}
         <div className="text-center mb-8">
-          <h1 className="font-[Poppins] text-7xl font-extrabold tracking-[-0.04em] leading-none">
+          {/* Antes: text-7xl fijo (72px). "DriverBoos" en extrabold a ese tamaño
+              se corta en pantallas angostas (iPhone SE, Android ~360px) porque
+              no hay espacio para las ~10 letras sin punto de quiebre (no hay
+              espacio entre "Driver" y "Boos"). Ahora escala: 4xl en móvil
+              chico, hasta 7xl solo desde md+ (laptop/tablet). */}
+          <h1 className="font-[Poppins] text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-[-0.04em] leading-none">
             <span className="text-white">Driver</span>
             <span className="text-orange-500">Boos</span>
           </h1>
@@ -115,10 +120,15 @@ const LoginPage = () => {
                     required
                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition pr-12"
                   />
+                  {/* Antes: sin min-h-0, heredaba min-height:54px + padding:12px 24px
+                      del <button> global. La caja invisible del botón (~54x68px)
+                      se metía dentro del input, tapando parte del texto/click
+                      cerca del borde derecho. Ahora el botón mide solo lo que
+                      necesita el ícono. */}
                   <button
                     type="button"
                     onClick={togglePasswordVisibility}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 min-h-0 p-1 text-gray-400 hover:text-white focus:outline-none"
                     aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                   >
                     {showPassword ? (
@@ -197,9 +207,13 @@ const LoginPage = () => {
                     Regístrate
                   </Link>
                 </p>
+                {/* Antes: sin min-h-0/padding reset, este link-botón heredaba
+                    min-height:54px + padding:12px 24px del button global,
+                    generando un bloque alto con espacio en blanco raro donde
+                    debería verse como texto simple. */}
                 <button
                   onClick={() => setShowResetForm(true)}
-                  className="text-sm text-orange-400 hover:text-orange-300 hover:underline transition block w-full"
+                  className="text-sm text-orange-400 hover:text-orange-300 hover:underline transition block w-full min-h-0 p-0"
                 >
                   ¿Olvidaste tu contraseña?
                 </button>
@@ -211,7 +225,7 @@ const LoginPage = () => {
                   setResetMessage('');
                   setResetError('');
                 }}
-                className="text-sm text-orange-400 hover:text-orange-300 hover:underline transition"
+                className="text-sm text-orange-400 hover:text-orange-300 hover:underline transition min-h-0 p-0"
               >
                 ← Volver a iniciar sesión
               </button>
