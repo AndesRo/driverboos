@@ -7,9 +7,11 @@ const OrderList = () => {
   const [orders, setOrders] = useState([]);
   const [comunas, setComunas] = useState([]);
   const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]);
+  const [showAll, setShowAll] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Cargar comunas para el select de edición
   useEffect(() => {
@@ -20,27 +22,54 @@ const OrderList = () => {
     fetchComunas();
   }, []);
 
-  const fetchOrders = async (date) => {
-    if (!user) return;
+  const fetchOrders = async () => {
+    if (!user) {
+      setOrders([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
-    const { data, error } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('fecha', date)
-      .order('created_at', { ascending: false });
-    if (!error) setOrders(data);
-    setLoading(false);
+    setError(null);
+
+    try {
+      let query = supabase
+        .from('orders')
+        .select('*')
+        .eq('user_id', user.id);
+
+      // Si no está en modo "ver todas", filtrar por fecha
+      if (!showAll && filterDate) {
+        query = query.eq('fecha', filterDate);
+      }
+
+      const { data, error: queryError } = await query.order('created_at', { ascending: false });
+
+      if (queryError) {
+        console.error('Error al cargar órdenes:', queryError);
+        setError('Error al cargar las órdenes: ' + queryError.message);
+        setOrders([]);
+      } else {
+        setOrders(data || []);
+      }
+    } catch (err) {
+      console.error('Error inesperado:', err);
+      setError('Error inesperado al cargar las órdenes.');
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Cargar órdenes cuando cambia el filtro o el usuario
   useEffect(() => {
-    fetchOrders(filterDate);
-  }, [filterDate, user]);
+    fetchOrders();
+  }, [filterDate, showAll, user]);
 
   const handleDelete = async (id) => {
     if (!confirm('¿Eliminar esta orden?')) return;
     await supabase.from('orders').delete().eq('id', id);
-    fetchOrders(filterDate);
+    fetchOrders();
   };
 
   const startEdit = (order) => {
@@ -62,7 +91,7 @@ const OrderList = () => {
     const { id, ...updates } = editForm;
     await supabase.from('orders').update(updates).eq('id', id);
     setEditingId(null);
-    fetchOrders(filterDate);
+    fetchOrders();
   };
 
   // Cálculo de totales
@@ -75,15 +104,25 @@ const OrderList = () => {
     <div className="p-4 h-full flex flex-col">
       {/* Cabecera fija */}
       <div className="sticky top-0 z-10 bg-[#1a1a1a] pb-3 space-y-3">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <label className="text-sm font-medium text-gray-300">Fecha:</label>
           <input
             type="date"
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
             className="flex-1 min-w-[120px]"
+            disabled={showAll}
           />
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className={`px-3 py-1 rounded text-sm font-medium ${
+              showAll ? 'bg-primary text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            {showAll ? '📅 Ver por fecha' : '📋 Ver todas'}
+          </button>
         </div>
+
         <div className="grid grid-cols-3 gap-2">
           <div className="bg-green-900/30 p-2 rounded text-center border border-green-700 text-sm">
             ✅ {entregados}
@@ -98,6 +137,7 @@ const OrderList = () => {
         <div className="text-right font-semibold text-lg">
           Total bruto: ${totalBruto}
         </div>
+        {error && <p className="text-red-500 text-sm">{error}</p>}
       </div>
 
       {/* Lista de órdenes con scroll */}
@@ -105,7 +145,9 @@ const OrderList = () => {
         {loading ? (
           <p className="text-center text-gray-400">Cargando...</p>
         ) : orders.length === 0 ? (
-          <p className="text-center text-gray-500">No hay órdenes para esta fecha</p>
+          <p className="text-center text-gray-500">
+            {showAll ? 'No hay órdenes registradas' : 'No hay órdenes para esta fecha'}
+          </p>
         ) : (
           orders.map((order) => (
             <div key={order.id} className="card p-3">
@@ -149,7 +191,7 @@ const OrderList = () => {
                   </select>
                   <input
                     name="notas"
-                    placeholder="Notas"
+                    placeholder="Notas (opcional)"
                     value={editForm.notas || ''}
                     onChange={handleEditChange}
                     className="w-full"
