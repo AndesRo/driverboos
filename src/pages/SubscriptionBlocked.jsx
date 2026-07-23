@@ -96,12 +96,11 @@ const SubscriptionBlocked = () => {
           onClick={handleContact}
           className="btn-primary w-full py-3 text-lg flex items-center justify-center gap-2"
         >
-          <span>📱</span> Ya transferí, avisar al Administrador
+          <span>📱</span> Contactar al Administrador
         </button>
 
         <p className="text-gray-500 text-sm">
-          Realiza la transferencia con los datos de arriba y luego haz clic para avisarle al
-          administrador. Tu cuenta se activará una vez confirmado el pago.
+          Realiza la transferencia con los datos de arriba o contacata al administrador para activar tu cuenta. Tu cuenta se activará una vez confirmado el pago.
         </p>
 
         <button
