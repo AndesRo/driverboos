@@ -1,2 +1,11 @@
+# robots.txt para DriverBoos
+
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /subscription-blocked
+Disallow: /reset-password
+Disallow: /confirmacion-exitosa
+
+# Sitemap (opcional)
+Sitemap: https://driverboos.vercel.app/sitemap.xml

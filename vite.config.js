@@ -11,7 +11,8 @@ export default defineConfig({
         'favicon.ico',
         'apple-touch-icon.png',
         'mask-icon.svg',
-        'social-image.png', // ✅ agregado para precache
+        'social-preview.png',   // ← corregido
+        'apple-splash.png',     // ← opcional, para precache del splash
       ],
       manifest: {
         name: 'Driver Boos',
