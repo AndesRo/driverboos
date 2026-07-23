@@ -28,7 +28,7 @@ const OrderList = () => {
       .select('*')
       .eq('user_id', user.id)
       .eq('fecha', date)
-      .order('ruta', { ascending: true });
+      .order('created_at', { ascending: false });
     if (!error) setOrders(data);
     setLoading(false);
   };
@@ -70,9 +70,6 @@ const OrderList = () => {
   const entregados = orders.filter(o => o.estado === 'entregado').length;
   const parciales = orders.filter(o => o.estado === 'parcial').length;
   const noEntregados = orders.filter(o => o.estado === 'no_entregado').length;
-
-  // Opciones de ruta para el select en edición
-  const rutaOptions = ['1', '2', '3', 'K', 'Sin ruta'];
 
   return (
     <div className="p-4 h-full flex flex-col">
@@ -133,17 +130,6 @@ const OrderList = () => {
                       <option key={c} value={c}>{c}</option>
                     ))}
                   </select>
-                  <select
-                    name="ruta"
-                    value={editForm.ruta || ''}
-                    onChange={handleEditChange}
-                    className="w-full"
-                  >
-                    <option value="">Seleccionar ruta</option>
-                    {rutaOptions.map((r) => (
-                      <option key={r} value={r}>{r}</option>
-                    ))}
-                  </select>
                   <input
                     name="fecha"
                     type="date"
@@ -161,6 +147,13 @@ const OrderList = () => {
                     <option value="parcial">Parcial</option>
                     <option value="no_entregado">No entregado</option>
                   </select>
+                  <input
+                    name="notas"
+                    placeholder="Notas"
+                    value={editForm.notas || ''}
+                    onChange={handleEditChange}
+                    className="w-full"
+                  />
                   <div className="flex gap-2">
                     <button className="btn-primary flex-1" onClick={saveEdit}>Guardar</button>
                     <button className="btn-secondary flex-1" onClick={cancelEdit}>Cancelar</button>
@@ -174,10 +167,13 @@ const OrderList = () => {
                       {order.order_number}
                     </div>
                     <div className="text-sm text-gray-300">
-                      {order.comuna} · Ruta {order.ruta || 'Sin ruta'}
+                      {order.comuna}
                     </div>
                     <div className="text-xs text-gray-400">
                       {order.fecha}
+                      {order.notas && (
+                        <span className="ml-2 text-primary-300">📝 {order.notas}</span>
+                      )}
                     </div>
                   </div>
                   <div className="text-right ml-2 flex-shrink-0">
@@ -189,22 +185,16 @@ const OrderList = () => {
                     }`}>
                       {order.estado}
                     </span>
-                    {/* Antes: className="text-blue-400 text-xs p-1" sin .btn-sm.
-                        El <button> global tiene min-height:54px, así que estos íconos
-                        quedaban dentro de un botón gigante mal proporcionado.
-                        Ahora usan .btn-sm (definida en index.css para esto mismo). */}
                     <div className="mt-1 flex gap-1 justify-end">
                       <button
-                        className="btn-sm text-blue-400 bg-transparent"
+                        className="text-blue-400 text-xs p-1"
                         onClick={() => startEdit(order)}
-                        aria-label="Editar orden"
                       >
                         ✏️
                       </button>
                       <button
-                        className="btn-sm text-red-400 bg-transparent"
+                        className="text-red-400 text-xs p-1"
                         onClick={() => handleDelete(order.id)}
-                        aria-label="Eliminar orden"
                       >
                         🗑️
                       </button>
