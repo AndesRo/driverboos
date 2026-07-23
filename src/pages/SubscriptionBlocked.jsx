@@ -100,7 +100,7 @@ const SubscriptionBlocked = () => {
         </button>
 
         <p className="text-gray-500 text-sm">
-          Realiza la transferencia con los datos de arriba o contacata al administrador para activar tu cuenta. Tu cuenta se activará una vez confirmado el pago.
+          Realiza la transferencia con los datos de arriba o contacta al administrador para activar tu cuenta. Tu cuenta se activará una vez confirmado el pago.
         </p>
 
         <button
