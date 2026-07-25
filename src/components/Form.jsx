@@ -25,65 +25,62 @@ const Form = () => {
   };
 
   return (
-    <div className="p-2 space-y-2 max-w-full h-full flex flex-col">
-      <h2 className="text-xl font-bold text-primary text-center">📄 Información de Boleta</h2>
+    <div className="p-3 space-y-3 h-full flex flex-col">
+      <h2 className="text-xl font-bold text-primary">📄 Información de Boleta</h2>
 
-      {/* Datos de la boleta en formato compacto */}
-      <div className="card p-3 space-y-1 text-sm">
-        <div className="flex justify-between">
+      {/* Tarjeta de datos de boleta compacta */}
+      <div className="card p-3 text-sm space-y-1">
+        <div className="grid grid-cols-2 gap-x-2 text-gray-300">
           <span className="text-gray-400">Fecha:</span>
           <span>{today}</span>
-        </div>
-        <div className="flex justify-between">
           <span className="text-gray-400">RUT:</span>
           <span>76.456.187-2</span>
-        </div>
-        <div className="flex justify-between">
           <span className="text-gray-400">Giro:</span>
-          <span>Transporte</span>
+          <span className="text-xs">Otras activ. conexas al transporte</span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-gray-400">Enviar a:</span>
-          <span className="text-xs truncate">finanzas@boosmap.com</span>
+        <div className="text-xs text-gray-400">
+          INVERSIONES ASINARA SPA - AV. ANDRES BELLO 2777 Piso 19 Of. 01, LAS CONDES
+        </div>
+        <div className="text-xs text-primary">
+          Enviar a: finanzas@boosmap.com
         </div>
       </div>
 
-      {/* Prestación + Botones agrupados en una fila compacta */}
+      {/* Prestación + Botones agrupados */}
       <div className="card p-3">
-        <p className="text-sm text-gray-300 font-medium">Remuneración booster - Junio</p>
-        <div className="flex flex-wrap gap-2 mt-2">
+        <div className="flex items-center justify-between">
+          <span className="font-semibold text-white text-sm">Remuneración booster - Junio</span>
           <button
             onClick={() => window.open('https://homer.sii.cl/', '_blank')}
-            className="btn-secondary flex-1 text-xs py-2 px-2 min-h-[40px]"
+            className="btn-secondary text-xs py-1 px-2 min-h-0"
           >
             📋 SII
           </button>
+        </div>
+        <div className="flex flex-wrap gap-2 mt-2">
           <button
             onClick={enviarBoleta}
-            className="btn-primary flex-1 text-xs py-2 px-2 min-h-[40px]"
+            className="btn-primary flex-1 text-sm py-2 min-h-0"
           >
             ✉️ Finanzas
           </button>
           <button
             onClick={contactarSAF}
-            className="btn-secondary flex-1 text-xs py-2 px-2 min-h-[40px]"
+            className="btn-secondary flex-1 text-sm py-2 min-h-0"
           >
             💬 SAF
           </button>
         </div>
-        <p className="text-[10px] text-gray-500 mt-1 text-center">
-          finanzas@boosmap.com · saf@boosmap.com
-        </p>
       </div>
 
-      {/* Formularios externos en una fila compacta */}
+      {/* Formularios externos */}
       <div className="card p-3">
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <a
             href="https://boosmap.typeform.com/to/sFgws2bM"
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-primary flex-1 text-center text-xs py-2 px-2 min-h-[40px]"
+            className="btn-primary flex-1 text-sm py-2 min-h-0 text-center"
           >
             📋 JUMBO VA
           </a>
@@ -91,7 +88,7 @@ const Form = () => {
             href="https://boosmap.typeform.com/to/tVQ0iVHF"
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-primary flex-1 text-center text-xs py-2 px-2 min-h-[40px]"
+            className="btn-primary flex-1 text-sm py-2 min-h-0 text-center"
           >
             📋 EXTRAS
           </a>
