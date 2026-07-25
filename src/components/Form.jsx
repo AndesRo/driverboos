@@ -60,7 +60,7 @@ Enviar a: ${boletaData.email}
 
   return (
     <div className="p-4 space-y-6 max-w-full">
-      <h2 className="text-2xl font-bold text-primary">📄 Información de Boleta</h2>
+
 
       {/* Tarjeta: Prestación + Botones agrupados */}
       <div className="card">
