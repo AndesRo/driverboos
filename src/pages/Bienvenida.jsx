@@ -3,9 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Bienvenida = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [countdown, setCountdown] = useState(5);
+
+  // Esperar a que la sesión esté cargada
+  useEffect(() => {
+    if (!loading && !user) {
+      // Si no hay usuario después de cargar, redirige al login
+      navigate('/login');
+    }
+  }, [user, loading, navigate]);
 
   useEffect(() => {
     if (user) {
@@ -25,6 +33,18 @@ const Bienvenida = () => {
 
   // Obtener nombre del usuario desde metadata
   const nombre = user?.user_metadata?.nombre || user?.email || 'Usuario';
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#1a1a1a]">
+        <p className="text-white text-lg">Cargando...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Redirige al login en el useEffect
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#1a1a1a]">
