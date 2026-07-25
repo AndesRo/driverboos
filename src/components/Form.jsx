@@ -64,8 +64,8 @@ Enviar a: ${boletaData.email}
 
       {/* Tarjeta: Prestación + Botones agrupados */}
       <div className="card">
-        <h3 className="font-semibold text-lg text-white mb-3">Prestación</h3>
-        <p className="text-gray-300 mb-4">Remuneración booster - mes de Junio</p>
+  
+        
 
         <div className="flex flex-col sm:flex-row gap-3">
           <button
@@ -128,7 +128,7 @@ Enviar a: ${boletaData.email}
 
       {/* Tarjeta: Formularios externos */}
       <div className="card">
-        <h3 className="font-semibold text-lg text-white mb-3">Formularios externos</h3>
+        <h3 className="font-semibold text-lg text-white mb-3">Formularios de Registros</h3>
         <div className="flex flex-col sm:flex-row gap-3">
           <a
             href="https://boosmap.typeform.com/to/sFgws2bM"
