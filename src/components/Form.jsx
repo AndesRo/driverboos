@@ -1,12 +1,46 @@
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 const Form = () => {
   const { user } = useAuth();
+  const [showBoleta, setShowBoleta] = useState(false);
+  const [copied, setCopied] = useState(false);
   const today = new Date().toISOString().split('T')[0];
 
   const nombreCompleto = user?.user_metadata?.nombre && user?.user_metadata?.apellido
     ? `${user.user_metadata.nombre} ${user.user_metadata.apellido}`
     : user?.email || 'Usuario';
+
+  // Datos de la boleta
+  const boletaData = {
+    fecha: today,
+    nombre: 'INVERSIONES ASINARA SPA',
+    rut: '76.456.187-2',
+    direccion: 'AV. ANDRES BELLO 2777 Piso 19 Oficina 01, LAS CONDES',
+    giro: 'OTRAS ACTIVIDADES CONEXAS AL TRANSPORTE',
+    email: 'finanzas@boosmap.com'
+  };
+
+  // Texto formateado para copiar
+  const boletaTexto = `
+Datos de la boleta:
+Fecha: ${boletaData.fecha}
+A nombre de: ${boletaData.nombre}
+RUT: ${boletaData.rut}
+Dirección: ${boletaData.direccion}
+Giro: ${boletaData.giro}
+Enviar a: ${boletaData.email}
+  `.trim();
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(boletaTexto);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      alert('No se pudo copiar: ' + err.message);
+    }
+  };
 
   const enviarBoleta = () => {
     const asunto = encodeURIComponent('Boleta de honorarios - ' + nombreCompleto);
@@ -25,62 +59,82 @@ const Form = () => {
   };
 
   return (
-    <div className="p-3 space-y-3 h-full flex flex-col">
-      <h2 className="text-xl font-bold text-primary">📄 Información de Boleta</h2>
+    <div className="p-4 space-y-6 max-w-full">
+      <h2 className="text-2xl font-bold text-primary">📄 Información de Boleta</h2>
 
-      {/* Tarjeta de datos de boleta compacta */}
-      <div className="card p-3 text-sm space-y-1">
-        <div className="grid grid-cols-2 gap-x-2 text-gray-300">
-          <span className="text-gray-400">Fecha:</span>
-          <span>{today}</span>
-          <span className="text-gray-400">RUT:</span>
-          <span>76.456.187-2</span>
-          <span className="text-gray-400">Giro:</span>
-          <span className="text-xs">Otras activ. conexas al transporte</span>
-        </div>
-        <div className="text-xs text-gray-400">
-          INVERSIONES ASINARA SPA - AV. ANDRES BELLO 2777 Piso 19 Of. 01, LAS CONDES
-        </div>
-        <div className="text-xs text-primary">
-          Enviar a: finanzas@boosmap.com
-        </div>
-      </div>
+      {/* Tarjeta: Prestación + Botones agrupados */}
+      <div className="card">
+        <h3 className="font-semibold text-lg text-white mb-3">Prestación</h3>
+        <p className="text-gray-300 mb-4">Remuneración booster - mes de Junio</p>
 
-      {/* Prestación + Botones agrupados */}
-      <div className="card p-3">
-        <div className="flex items-center justify-between">
-          <span className="font-semibold text-white text-sm">Remuneración booster - Junio</span>
+        <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={() => window.open('https://homer.sii.cl/', '_blank')}
-            className="btn-secondary text-xs py-1 px-2 min-h-0"
+            className="btn-secondary flex-1 flex items-center justify-center gap-2"
           >
-            📋 SII
+            📋 Ir al SII
           </button>
-        </div>
-        <div className="flex flex-wrap gap-2 mt-2">
           <button
             onClick={enviarBoleta}
-            className="btn-primary flex-1 text-sm py-2 min-h-0"
+            className="btn-primary flex-1 flex items-center justify-center gap-2"
           >
-            ✉️ Finanzas
+            ✉️ Enviar boleta
           </button>
           <button
             onClick={contactarSAF}
-            className="btn-secondary flex-1 text-sm py-2 min-h-0"
+            className="btn-secondary flex-1 flex items-center justify-center gap-2"
           >
-            💬 SAF
+            💬 Contactar SAF
           </button>
         </div>
+        <p className="text-xs text-gray-500 mt-2">
+          finanzas@boosmap.com · saf@boosmap.com
+        </p>
       </div>
 
-      {/* Formularios externos */}
-      <div className="card p-3">
-        <div className="flex flex-wrap gap-2">
+      {/* Tarjeta: Datos de boleta (colapsable) */}
+      <div className="card">
+        <button
+          onClick={() => setShowBoleta(!showBoleta)}
+          className="w-full flex items-center justify-between text-left"
+        >
+          <span className="font-semibold text-lg text-white">
+            📋 Datos de la boleta
+          </span>
+          <span className="text-primary text-2xl">
+            {showBoleta ? '−' : '+'}
+          </span>
+        </button>
+
+        {showBoleta && (
+          <div className="mt-4 p-4 bg-[#3d3d3d] rounded-lg space-y-2">
+            <div className="space-y-1 text-gray-300 text-sm">
+              <p><span className="font-medium text-gray-400">Fecha:</span> {boletaData.fecha}</p>
+              <p><span className="font-medium text-gray-400">A nombre de:</span> {boletaData.nombre}</p>
+              <p><span className="font-medium text-gray-400">RUT:</span> {boletaData.rut}</p>
+              <p><span className="font-medium text-gray-400">Dirección:</span> {boletaData.direccion}</p>
+              <p><span className="font-medium text-gray-400">Giro:</span> {boletaData.giro}</p>
+              <p><span className="font-medium text-gray-400">Enviar a:</span> {boletaData.email}</p>
+            </div>
+            <button
+              onClick={handleCopy}
+              className="mt-2 btn-secondary w-full flex items-center justify-center gap-2 text-sm py-2"
+            >
+              {copied ? '✅ Copiado' : '📋 Copiar datos'}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Tarjeta: Formularios externos */}
+      <div className="card">
+        <h3 className="font-semibold text-lg text-white mb-3">Formularios externos</h3>
+        <div className="flex flex-col sm:flex-row gap-3">
           <a
             href="https://boosmap.typeform.com/to/sFgws2bM"
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-primary flex-1 text-sm py-2 min-h-0 text-center"
+            className="btn-primary flex-1 text-center"
           >
             📋 JUMBO VA
           </a>
@@ -88,7 +142,7 @@ const Form = () => {
             href="https://boosmap.typeform.com/to/tVQ0iVHF"
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-primary flex-1 text-sm py-2 min-h-0 text-center"
+            className="btn-primary flex-1 text-center"
           >
             📋 EXTRAS
           </a>
