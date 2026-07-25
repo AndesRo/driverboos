@@ -199,45 +199,43 @@ const OrderForm = ({ onOrderAdded }) => {
         </select>
       </div>
 
-      {/* Extras como tarjetas interactivas */}
+      {/* Extras: antes grid-cols-1 sm:grid-cols-3 -> en móvil se apilaban
+          verticalmente (3 tarjetas altas con ícono+texto+descripción+precio),
+          ocupando mucho alto y obligando a hacer scroll dentro del form.
+          Ahora: grid-cols-3 SIEMPRE (una sola fila en cualquier pantalla),
+          tarjetas compactas sin descripción visible (se mueve a title/
+          aria-label). Son <button> reales en vez de <div onClick> para
+          que funcionen con teclado; min-h-0 para no heredar los 54px del
+          button global. */}
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-300">Extras</label>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2">
           {extrasList.map((extra) => {
             const isActive = form[extra.key];
             return (
-              <div
+              <button
+                type="button"
                 key={extra.key}
                 onClick={() => toggleExtra(extra.key)}
+                title={extra.description}
+                aria-label={`${extra.label}: ${extra.description}. +$${extra.monto}. ${isActive ? 'Seleccionado' : 'No seleccionado'}`}
+                aria-pressed={isActive}
                 className={`
-                  cursor-pointer rounded-xl p-3 border-2 transition-all duration-200
+                  min-h-0 flex flex-col items-center justify-center gap-0.5
+                  rounded-lg p-2 border-2 text-center transition-all duration-200
                   ${isActive
-                    ? 'border-primary bg-[#3a3a3a] shadow-lg shadow-primary/20'
+                    ? 'border-primary bg-[#3a3a3a] shadow-md shadow-primary/20'
                     : 'border-[#555] bg-[#2d2d2d] hover:border-[#777]'
                   }
                 `}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">{extra.icon}</span>
-                    <div>
-                      <div className={`font-semibold ${isActive ? 'text-primary' : 'text-gray-300'}`}>
-                        {extra.label}
-                      </div>
-                      <div className="text-xs text-gray-400">{extra.description}</div>
-                    </div>
-                  </div>
-                  <div className={`
-                    w-6 h-6 rounded-full flex items-center justify-center
-                    ${isActive ? 'bg-primary text-white' : 'border-2 border-gray-500'}
-                  `}>
-                    {isActive && '✓'}
-                  </div>
-                </div>
-                <div className="text-right text-sm text-gray-400 mt-1">
-                  +${extra.monto}
-                </div>
-              </div>
+                <span className="text-xl leading-none">{extra.icon}</span>
+                <span className={`text-xs font-semibold leading-tight ${isActive ? 'text-primary' : 'text-gray-300'}`}>
+                  {extra.label}
+                </span>
+                <span className="text-[10px] text-gray-400 leading-none">+${extra.monto}</span>
+                {isActive && <span className="text-primary text-xs leading-none">✓</span>}
+              </button>
             );
           })}
         </div>
