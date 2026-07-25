@@ -56,7 +56,8 @@ const RegisterPage = () => {
             nombre: form.nombre,
             apellido: form.apellido,
             telefono: form.telefono
-          }
+          },
+          redirectTo: window.location.origin + '/bienvenida' // ✅ Redirige a bienvenida
         }
       });
       if (signUpError) throw signUpError;
@@ -119,7 +120,6 @@ const RegisterPage = () => {
               required
               className="w-full input-lg"
             />
-            {/* Campo de Contraseña con toggle */}
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -131,14 +131,10 @@ const RegisterPage = () => {
                 minLength={6}
                 className="w-full input-lg pr-12"
               />
-              {/* pl-0 agregado: el button global trae padding:12px 24px (shorthand).
-                  pr-3 ya sobrescribía el lado derecho, pero el izquierdo seguía
-                  en 24px, ensanchando la caja clicable ~12px hacia adentro del
-                  input más de lo necesario. */}
               <button
                 type="button"
                 onClick={togglePasswordVisibility}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 pl-0 text-gray-400 hover:text-white focus:outline-none"
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-white focus:outline-none"
                 tabIndex="-1"
                 aria-label="Mostrar u ocultar contraseña"
               >
@@ -154,7 +150,6 @@ const RegisterPage = () => {
                 )}
               </button>
             </div>
-            {/* Campo de Confirmar Contraseña con toggle */}
             <div className="relative">
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
@@ -168,7 +163,7 @@ const RegisterPage = () => {
               <button
                 type="button"
                 onClick={toggleConfirmPasswordVisibility}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 pl-0 text-gray-400 hover:text-white focus:outline-none"
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-white focus:outline-none"
                 tabIndex="-1"
                 aria-label="Mostrar u ocultar contraseña"
               >
@@ -195,7 +190,8 @@ const RegisterPage = () => {
         </div>
       </div>
       <footer className="mt-8 text-center text-gray-500 text-sm">
-        <p>Desarrollado por <span className="text-primary">Andrewro</span> © {new Date().getFullYear()}</p>
+        <p>Desarrollado por <span className="text-primary">Andrés Espinoza</span> © {new Date().getFullYear()}</p>
+        <p className="text-xs text-gray-600">App para conductores de Jumbo / Boosmap</p>
       </footer>
     </div>
   );

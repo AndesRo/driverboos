@@ -5,7 +5,7 @@ import Navbar from './components/Navbar';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import SubscriptionBlocked from './pages/SubscriptionBlocked';
-import ConfirmacionExitosa from './pages/ConfirmacionExitosa';
+import Bienvenida from './pages/Bienvenida';
 import OrderForm from './components/OrderForm';
 import OrderList from './components/OrderList';
 import Report from './components/Report';
@@ -20,7 +20,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/confirmacion-exitosa" element={<ConfirmacionExitosa />} />
+          <Route path="/bienvenida" element={<Bienvenida />} />
           <Route path="/subscription-blocked" element={<SubscriptionBlocked />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/*" element={
