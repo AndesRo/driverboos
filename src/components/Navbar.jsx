@@ -39,7 +39,7 @@ const Navbar = () => {
       </NavLink>
       <NavLink to="/formularios" className={({ isActive }) => (isActive ? 'text-primary' : 'text-gray-400')}>
         <span className="icon">📝</span>
-        <span className="label">Formularios</span>
+        <span className="label">Registro</span>
       </NavLink>
       <NavLink to="/reporte" className={({ isActive }) => (isActive ? 'text-primary' : 'text-gray-400')}>
         <span className="icon">📊</span>
@@ -53,7 +53,7 @@ const Navbar = () => {
       )}
       <button onClick={handleLogout} className="text-gray-400 hover:text-red-500">
         <span className="icon">🚪</span>
-        <span className="label">Cerrar sesión</span>
+        <span className="label">Salir</span>
       </button>
     </nav>
   );
