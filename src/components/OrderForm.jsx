@@ -137,9 +137,18 @@ const OrderForm = ({ onOrderAdded }) => {
     }
   };
 
+  // Nombre del usuario para el saludo
+  const nombre = user?.user_metadata?.nombre || user?.email || 'Usuario';
+
   return (
     <form onSubmit={handleSubmit} className="p-4 space-y-4">
-      <h2 className="text-2xl font-bold text-primary">Nueva orden</h2>
+      {/* Encabezado con título y saludo */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-primary">Nueva orden</h2>
+        <span className="text-sm text-gray-400">
+          👋 {nombre}
+        </span>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input
@@ -153,15 +162,7 @@ const OrderForm = ({ onOrderAdded }) => {
           inputMode="numeric"
           autoComplete="off"
         />
-        <input
-          type="text"
-          name="notas"
-          placeholder="Bono extra / Nota especial"
-          value={form.notas}
-          onChange={handleChange}
-          className="w-full"
-        />
-      </div>
+    
 
       <select
         name="comuna"
@@ -187,6 +188,8 @@ const OrderForm = ({ onOrderAdded }) => {
           onChange={handleChange}
           className="w-full"
         />
+
+       
         <select
           name="estado"
           value={form.estado}
@@ -198,15 +201,17 @@ const OrderForm = ({ onOrderAdded }) => {
           <option value="no_entregado">No entregado</option>
         </select>
       </div>
+        <input
+          type="text"
+          name="notas"
+          placeholder="Notas (opcional)"
+          value={form.notas}
+          onChange={handleChange}
+          className="w-full"
+        />
+      </div>
 
-      {/* Extras: antes grid-cols-1 sm:grid-cols-3 -> en móvil se apilaban
-          verticalmente (3 tarjetas altas con ícono+texto+descripción+precio),
-          ocupando mucho alto y obligando a hacer scroll dentro del form.
-          Ahora: grid-cols-3 SIEMPRE (una sola fila en cualquier pantalla),
-          tarjetas compactas sin descripción visible (se mueve a title/
-          aria-label). Son <button> reales en vez de <div onClick> para
-          que funcionen con teclado; min-h-0 para no heredar los 54px del
-          button global. */}
+      {/* Extras como botones compactos (3 columnas fijas) */}
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-300">Extras</label>
         <div className="grid grid-cols-3 gap-2">

@@ -190,8 +190,7 @@ const RegisterPage = () => {
         </div>
       </div>
       <footer className="mt-8 text-center text-gray-500 text-sm">
-        <p>Desarrollado por <span className="text-primary">Andrés Espinoza</span> © {new Date().getFullYear()}</p>
-        <p className="text-xs text-gray-600">App para conductores de Jumbo / Boosmap</p>
+        <p>Desarrollado por <span className="text-primary">Armtech</span> © {new Date().getFullYear()}</p>
       </footer>
     </div>
   );

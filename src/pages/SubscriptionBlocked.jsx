@@ -2,15 +2,21 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const SubscriptionBlocked = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth(); // ✅ Obtener logout
   const navigate = useNavigate();
 
   const handleContactAdmin = () => {
     const nombre = user?.user_metadata?.nombre || 'Usuario';
     const email = user?.email || '';
     const mensaje = `Hola, necesito renovar mi suscripción de DriverBoos.%0A%0ANombre: ${nombre}%0ACorreo: ${email}%0A%0AQuedo atento a la información de pago.`;
-    // Reemplaza el número con el del administrador
     window.open(`https://wa.me/56997416485?text=${mensaje}`, '_blank');
+  };
+
+  const handleLogout = async () => {
+    if (window.confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+      await logout();
+      navigate('/login');
+    }
   };
 
   return (
@@ -35,7 +41,7 @@ const SubscriptionBlocked = () => {
           El administrador te compartirá los datos bancarios y gestionará la activación de tu suscripción.
         </p>
         <button
-          onClick={() => navigate('/login')}
+          onClick={handleLogout} // ✅ Ahora ejecuta logout() con confirmación
           className="text-primary hover:underline text-sm"
         >
           Cerrar sesión
